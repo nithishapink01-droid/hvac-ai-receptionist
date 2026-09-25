@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HVAC Lead Dashboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+    }
+
+    header {
+      background: #0b5cff;
+      color: white;
+      padding: 22px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+    }
+
+    .lead {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .lead strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #667085;
+      padding: 30px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: #0b5cff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>HVAC Lead Dashboard</h1>
+  <p>Customer service requests</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+
+    <button onclick="loadLeads()">Refresh Leads</button>
+
+    <div id="leads"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+function loadLeads() {
+
+  const container = document.getElementById("leads");
+
+  const leads =
+    JSON.parse(
+      localStorage.getItem("hvacLeads") || "[]"
+    );
+
+  if (leads.length === 0) {
+
+    container.innerHTML =
+      '<div class="empty">No customer leads yet.</div>';
+
+    return;
+  }
+
+  container.innerHTML = "";
+
+  leads.reverse().forEach((lead) => {
+
+    const item = document.createElement("div");
+
+    item.className = "lead";
+
+    item.innerHTML = `
+      <strong>${escapeHTML(lead.name)}</strong>
+      <div>📞 ${escapeHTML(lead.phone)}</div>
+      <div>🔧 ${escapeHTML(lead.service)}</div>
+      <div>🕒 ${new Date(lead.createdAt).toLocaleString()}</div>
+    `;
+
+    container.appendChild(item);
+
+  });
+}
+
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+loadLeads();
+
+</script>
+
+</body>
+</html>
