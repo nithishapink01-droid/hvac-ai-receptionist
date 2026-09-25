@@ -3,35 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>HVAC AI Receptionist</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f4f7fb;
       color: #172033;
     }
+
     header {
       background: #0b5cff;
       color: white;
       padding: 22px;
       text-align: center;
     }
-    header h1 { margin: 0 0 6px; }
-    header p { margin: 0; opacity: .9; }
+
+    header h1 {
+      margin: 0 0 6px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
     .container {
       max-width: 900px;
       margin: 30px auto;
       padding: 20px;
     }
+
     .card {
       background: white;
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 6px 25px rgba(0,0,0,.08);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
+
     .chat {
       height: 360px;
       overflow-y: auto;
@@ -40,26 +56,31 @@
       padding: 15px;
       background: #fafafa;
     }
+
     .message {
       padding: 12px 15px;
       border-radius: 12px;
       margin: 10px 0;
       max-width: 80%;
     }
+
     .bot {
       background: #e8f0ff;
       margin-right: auto;
     }
+
     .user {
       background: #0b5cff;
       color: white;
       margin-left: auto;
     }
+
     .input-row {
       display: flex;
       gap: 10px;
       margin-top: 12px;
     }
+
     input {
       flex: 1;
       padding: 14px;
@@ -67,6 +88,7 @@
       border-radius: 10px;
       font-size: 16px;
     }
+
     button {
       border: 0;
       border-radius: 10px;
@@ -76,14 +98,20 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button:hover { opacity: .9; }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
     .lead-form {
       display: grid;
       gap: 12px;
     }
+
     .lead-form input {
       width: 100%;
     }
+
     .success {
       display: none;
       padding: 12px;
@@ -91,6 +119,7 @@
       color: #176b35;
       border-radius: 10px;
     }
+
     footer {
       text-align: center;
       padding: 30px;
@@ -110,6 +139,7 @@
 
   <div class="card">
     <h2>AI Receptionist</h2>
+
     <div id="chat" class="chat">
       <div class="message bot">
         Hi! 👋 Welcome to Comfort Air Services. How can I help you today?
@@ -117,7 +147,12 @@
     </div>
 
     <div class="input-row">
-      <input id="messageInput" placeholder="Ask about HVAC service...">
+      <input
+        id="messageInput"
+        placeholder="Ask about HVAC service..."
+        onkeydown="if(event.key === 'Enter') sendMessage()"
+      >
+
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
@@ -126,13 +161,30 @@
     <h2>Request HVAC Service</h2>
 
     <div class="lead-form">
-      <input id="name" placeholder="Your name">
-      <input id="phone" placeholder="Phone number">
-      <input id="service" placeholder="What service do you need?">
-      <button onclick="submitLead()">Request Service</button>
+
+      <input
+        id="name"
+        placeholder="Your name"
+      >
+
+      <input
+        id="phone"
+        placeholder="Phone number"
+      >
+
+      <input
+        id="service"
+        placeholder="What service do you need?"
+      >
+
+      <button onclick="submitLead()">
+        Request Service
+      </button>
+
       <div id="success" class="success">
         ✅ Thanks! Your service request has been captured.
       </div>
+
     </div>
   </div>
 
@@ -143,73 +195,224 @@
 </footer>
 
 <script>
+
+let customerName = "";
+let customerPhone = "";
+
 function sendMessage() {
+
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
 
   if (!text) return;
 
   addMessage(text, "user");
+
   input.value = "";
 
   setTimeout(() => {
+
     const lower = text.toLowerCase();
+
+    /*
+      Detect phone number
+    */
+    const phoneMatch = text.match(
+      /(?:\+?\d[\d\s\-()]{6,}\d)/
+    );
+
+    /*
+      Detect name
+      Examples:
+      My name is John
+      I am John
+      I'm John
+    */
+    const nameMatch = text.match(
+      /(?:my name is|i am|i'm)\s+([a-zA-Z][a-zA-Z\s]{1,30})/i
+    );
+
+    if (nameMatch) {
+      customerName = nameMatch[1].trim();
+    }
+
+    if (phoneMatch) {
+      customerPhone = phoneMatch[0].trim();
+    }
+
+    /*
+      If customer gave name or phone,
+      do NOT ask for the same information again.
+    */
+    if (nameMatch || phoneMatch) {
+
+      let details = "";
+
+      if (customerName) {
+        details += "Thank you, " + customerName + ". ";
+      } else {
+        details += "Thank you. ";
+      }
+
+      if (customerPhone) {
+        details += "I have received your phone number. ";
+      }
+
+      details +=
+        "Your details have been received. Our HVAC team will contact you shortly. ✅";
+
+      addMessage(details, "bot");
+
+      return;
+    }
+
     let reply =
       "I'd be happy to help. Please tell me your name and phone number so our HVAC team can contact you.";
 
-    if (lower.includes("price") || lower.includes("cost")) {
-      reply = "HVAC service pricing depends on the problem. I can capture your details so the team can provide an accurate quote.";
-    } else if (lower.includes("emergency")) {
-      reply = "For an HVAC emergency, please provide your name and phone number. We'll help connect you with the service team.";
-    } else if (lower.includes("ac") || lower.includes("air conditioning")) {
-      reply = "We can help with AC repair, maintenance, and installation. What problem are you experiencing?";
-    } else if (lower.includes("heat") || lower.includes("furnace")) {
-      reply = "We can help with heating and furnace problems. What is happening with your system?";
+    /*
+      Pricing
+    */
+    if (
+      lower.includes("price") ||
+      lower.includes("cost") ||
+      lower.includes("quote")
+    ) {
+
+      reply =
+        "HVAC service pricing depends on the problem and service needed. I can collect your details so our team can provide an accurate quote.";
+
+    }
+
+    /*
+      Emergency
+    */
+    else if (
+      lower.includes("emergency") ||
+      lower.includes("urgent")
+    ) {
+
+      reply =
+        "For an HVAC emergency, please provide your name and phone number so our service team can contact you.";
+
+    }
+
+    /*
+      AC
+    */
+    else if (
+      lower.includes("ac") ||
+      lower.includes("air conditioning") ||
+      lower.includes("air conditioner")
+    ) {
+
+      reply =
+        "We can help with AC repair, maintenance, and installation. What problem are you experiencing?";
+
+    }
+
+    /*
+      Heating
+    */
+    else if (
+      lower.includes("heat") ||
+      lower.includes("furnace") ||
+      lower.includes("heating")
+    ) {
+
+      reply =
+        "We can help with heating and furnace problems. What is happening with your system?";
+
+    }
+
+    /*
+      Appointment
+    */
+    else if (
+      lower.includes("appointment") ||
+      lower.includes("book") ||
+      lower.includes("schedule")
+    ) {
+
+      reply =
+        "Sure! Please provide your name and phone number, and tell me what HVAC service you need.";
+
     }
 
     addMessage(reply, "bot");
+
   }, 500);
 }
 
+
 function addMessage(text, type) {
+
   const chat = document.getElementById("chat");
+
+  if (!chat) return;
+
   const message = document.createElement("div");
 
   message.className = "message " + type;
+
   message.textContent = text;
 
   chat.appendChild(message);
+
   chat.scrollTop = chat.scrollHeight;
 }
 
+
 function submitLead() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const service = document.getElementById("service").value.trim();
+
+  const name =
+    document.getElementById("name").value.trim();
+
+  const phone =
+    document.getElementById("phone").value.trim();
+
+  const service =
+    document.getElementById("service").value.trim();
 
   if (!name || !phone || !service) {
+
     alert("Please complete all fields.");
+
     return;
   }
 
-  const leads = JSON.parse(localStorage.getItem("hvacLeads") || "[]");
+  const leads =
+    JSON.parse(
+      localStorage.getItem("hvacLeads") || "[]"
+    );
 
   leads.push({
-    name,
-    phone,
-    service,
+
+    name: name,
+
+    phone: phone,
+
+    service: service,
+
     createdAt: new Date().toISOString()
+
   });
 
-  localStorage.setItem("hvacLeads", JSON.stringify(leads));
+  localStorage.setItem(
+    "hvacLeads",
+    JSON.stringify(leads)
+  );
 
-  document.getElementById("success").style.display = "block";
+  document.getElementById("success").style.display =
+    "block";
 
   document.getElementById("name").value = "";
+
   document.getElementById("phone").value = "";
+
   document.getElementById("service").value = "";
 }
+
 </script>
 
 </body>
-</html>
+  </html>
