@@ -299,16 +299,53 @@ function sendMessage() {
     /*
       AC
     */
-    else if (
-      lower.includes("ac") ||
-      lower.includes("air conditioning") ||
-      lower.includes("air conditioner")
-    ) {
+   else if (
+  lower.includes("ac") ||
+  lower.includes("air conditioning") ||
+  lower.includes("air conditioner")
+) {
 
-      reply =
-        "We can help with AC repair, maintenance, and installation. What problem are you experiencing?";
+  if (
+    lower.includes("not cooling") ||
+    lower.includes("warm air") ||
+    lower.includes("hot air")
+  ) {
+    reply =
+      "I'm sorry your AC isn't cooling. Is the AC running but blowing warm air, or is it not turning on at all?";
+  }
 
-    }
+  else if (
+    lower.includes("not turning on") ||
+    lower.includes("won't turn on") ||
+    lower.includes("not working")
+  ) {
+    reply =
+      "I can help with that. Is the AC completely not turning on, or does it turn on but stop after a few minutes?";
+  }
+
+  else if (
+    lower.includes("leak") ||
+    lower.includes("water leaking") ||
+    lower.includes("leaking water")
+  ) {
+    reply =
+      "An AC water leak can have several causes. Please turn off the system if water is reaching electrical areas. Would you like to request a service visit?";
+  }
+
+  else if (
+    lower.includes("noise") ||
+    lower.includes("loud") ||
+    lower.includes("strange sound")
+  ) {
+    reply =
+      "Strange AC noises can indicate a mechanical problem. What kind of sound are you hearing?";
+  }
+
+  else {
+    reply =
+      "We can help with AC repair, maintenance, and installation. What problem are you experiencing?";
+  }
+} 
 
     /*
       Heating
